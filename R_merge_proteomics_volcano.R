@@ -9,14 +9,14 @@ library(Hmisc)
 library(ggpubr)
 library(ggrepel)
 
-read_csv("PTS3886_AHA_Surf4_protein_filtered.csv") ->PTS3886_Annot
-read_csv("PTS3886_Subcell_annot.csv") -> PTS3886
+PTS3886_Annot <- read_csv("PTS3886_AHA_Surf4_protein_filtered.csv")
+PTS3886 <- read_csv("PTS3886_Subcell_annot.csv")
 
 #Merge with annotations and write
-inner_join(PTS3886_Annot, PTS3886, by = "Protein_names") -> PTS3886full_annot
+PTS3886full_annot <- inner_join(PTS3886_Annot, PTS3886, by = "Protein_names")
 
 #PTS3886 plot
-read_csv("PTS3886final.csv")->data
+data <- read_csv("PTS3886final.csv") 
 
 #FDR-adjust p-value
 data$adj_p_val_fdr <- p.adjust(data$t_test, "fdr")
@@ -27,7 +27,7 @@ data$significant1 = as.factor(data$t_test < 0.05)
 #labels to display
 data$absLog2FC <- abs(data$Log2FC)
 
-#to avoid displaying cytosolic protein names do not use abs
+#to avoid displaying cytosolic protein names, do not use abs
 SILAC_labels <- filter(data, Log2FC > 0.5 , t_test<0.05)
 SILAC_labels_fdr <- filter(data, Log2FC > 0.5 , adj_p_val_fdr<0.05)
 
@@ -40,17 +40,17 @@ PTS3886colour_Golgi <- data %>% filter(str_detect(Location, "Golgi"))
 PTS3886colour_lysosome <- data %>% filter(str_detect(Location, "Lysosome"))
 PTS3886colour_PM <- data %>% filter(str_detect(Location, "Cell membrane"))
 
-#Plot for non-adjusted p_values
+#Plot with non-adjusted p_values, labelled proteins are FDR-adjusted significant hits
 ggplot(data, 
        aes(Log2FC , -log10(t_test)))+
   geom_vline(xintercept = 0.5, linetype="dashed", color = "grey50") +
   geom_vline(xintercept = -0.5, linetype="dashed", color = "grey50")+
   geom_hline(yintercept = 1.3, linetype="dashed", color = "grey50") + 
-  geom_text_repel(data = SILAC_labels,
+  geom_text_repel(data = SILAC_labels_fdr,
                   aes(x=Log2FC,
                       y=-log10(t_test),
                       label = `Gene_names`))+
-  geom_point(data = PTS3886colour_PM,            #have to use variable names here!
+  geom_point(data = PTS3886colour_PM,          
              aes(x = Log2FC, y = -log10(t_test)),
              colour="deepskyblue3") +
   geom_point(data = PTS3886colour_cyt,            
