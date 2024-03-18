@@ -56,7 +56,7 @@ PTS5107colour_unknown <- PTS5107 %>% filter(str_detect(Location, "Unknown"))
 PTS5107colour_stressgranule <- PTS5107 %>% filter(str_detect(Location, "Stress granule"))
 PTS5107colour_mito <- PTS5107 %>% filter(str_detect(Location, "Mitochondrion"))
 
-#plot with FDR-adjusted p-values
+#plot with original FDR-adjusted p-values, dashed lines indicates statistical and fold-change significance boundaries
 ggplot(PTS5107, 
        aes(Log2_FC , -log10(adj_p_val_fdr())))+
   geom_vline(xintercept = 1.25, linetype="dashed", color = "grey50") +
@@ -165,6 +165,7 @@ ggplot(PTS5107,
              alpha = 1) +
   theme_pubr()
 
+#saves the last plot and a new, updated csv file
 ggsave(filename = "Final_HEK_SURF4KO.jpeg", device = "jpeg", path = NULL, width = 200, height = 150, units = c("mm"), dpi=700)
 write.csv(PTS5107,"C:/Users/jmald/silac/PTS_5107_September_2020_3-day_split/PTS5107_export.csv", row.names = FALSE)
 
